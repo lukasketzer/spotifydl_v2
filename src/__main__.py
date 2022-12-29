@@ -16,7 +16,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("playlist_link", help="The link of the spotify playlist. The playlist should be public.")
-    parser.add_argument("-t", "--thread_count", default=5, help="amout of threads used by the script", type=int)
+    parser.add_argument("-t", "--thread_count", default=16, help="amout of threads used by the script", type=int)
 
     args = parser.parse_args()
 
