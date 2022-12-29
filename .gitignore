@@ -1,2 +1,5 @@
 venv
 __pycache__
+.idea/
+.cache
+*m4a
