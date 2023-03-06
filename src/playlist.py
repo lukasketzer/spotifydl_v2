@@ -11,9 +11,9 @@ class Playlist:
 
         self.size: int = len(self.playlist)
 
-    def download(self):
+    def download(self, playlist_path: str):
         for song in self.playlist:
-            song.download()
+            song.download(playlist_path)
 
     def add(self, song: Song):
         self.playlist.append(song)
