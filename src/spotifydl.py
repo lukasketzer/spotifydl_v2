@@ -15,6 +15,8 @@ class SpotifyDL:
     ccm = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=ccm)
 
+    MAX_THREADS: Final[int] = 32
+
     def __init__(self, link: str):
         self.link: Final[str] = link
 
@@ -37,6 +39,7 @@ class SpotifyDL:
         self.name = response.get("name")
         self.creator = response.get("artists")[0].get("name")
         self.size = response.get("tracks").get("total")
+        
 
         album: Playlist = Playlist()
 
@@ -47,12 +50,15 @@ class SpotifyDL:
                 # extract title artist and album from api response and append to playlist list
                 title: str = song.get("name")
                 artist: str = song.get("artists")[0].get("name")  # TODO there are multiple artists, only takes one atm
+                duration: str = song.get("duration_ms")
 
                 album.add(Song(
                     title=title,
                     artist=artist,
-                    album=self.name
+                    album=self.name,
+                    duration=duration
                 ))
+
         return album
 
     def get_spotify_playlist(self) -> Playlist:
@@ -64,7 +70,7 @@ class SpotifyDL:
         self.creator = response.get("owner").get("display_name")
         self.size = response.get("tracks").get("total")
 
-        playlist = Playlist()
+        playlist: Playlist = Playlist()
 
         for i in range(math.ceil(self.size / 100)):
             response = self.sp.playlist_items(playlist_id=self.link, limit=100, offset=(i * 100))
@@ -73,18 +79,29 @@ class SpotifyDL:
 
                 # extract title artist and album from api response and append to playlist list
                 title: str = song.get("name")
-                artist: str = song.get("artists")[0].get("name")  # TODO there are multiple artists, only takes one atm
+                artist: str = song.get("artists")[0].get("name")  # TODO if there are multiple artists, only takes one atm
                 album: str = song.get("album").get("name")
+                duration: str = song.get("duration_ms")
 
                 playlist.add(Song(
                     title=title,
                     artist=artist,
-                    album=album
+                    album=album,
+                    duration=duration
                 ))
 
         return playlist
 
-    def split_playlist(self, threads: int) -> List[Playlist]:
+    def split_playlist(self, threads: int = 1) -> List[Playlist]:
+        MAX_THREADS = 32 # FIXME: Temporary fix
+        # max thread count 
+        if threads > MAX_THREADS:
+            threads = MAX_THREADS
+
+        # if the playlist size is smaller the the wanted threads
+        if self.size <= threads:
+            threads = self.size
+
         threading_playlists: List[Playlist] = []
         threading_playlists_size: int = round(self.size / threads)
 
