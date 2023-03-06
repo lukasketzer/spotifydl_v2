@@ -15,16 +15,21 @@ class Song:
         self.album = album
         self.duration: int = round(int(duration) / 1000) # from ms to s
 
-    def download(self):
+    def download(self, playlist_path: str):
         yt = YTMusic()
+        
+        # add trailing / for path
+        if playlist_path[-1] != "/":
+            playlist_path += "/"
 
         base_file_name: str = self.clean_string(f"{self.title}_{self.artist}_{self.album}")
-        file_name: str = f"spotifydl_{base_file_name}.m4a"
+        file_name: str = f"{playlist_path}spotifydl_{base_file_name}.m4a"
+        base_file_name = playlist_path + base_file_name
 
         query: str = f"{self.title} {self.artist} {self.album}"
 
         
-        video_id: str = self.get_best_matching_id(yt.search(query=query))     # get first search result TODO
+        video_id: str = self.get_best_matching_id(yt.search(query=query))
 
         if video_id == None: # TODO handle video ids which have not been found
             return
@@ -48,16 +53,13 @@ class Song:
                        "-metadata", f"album={self.album}",
                        file_name]
 
-                print(f"Embedding metadata")
+                print(f"Embedding metadata...")
                 subprocess.run(cmd)
                 os.remove(f"{base_file_name}.m4a")
             except:
                 return
 
-    """
-    get the best matching youtube video / song 
-
-    """
+    # get the best matching youtube video / song 
     def get_best_matching_id(self, results) -> str: 
     
         # return None if there are no search results
@@ -77,7 +79,6 @@ class Song:
                 "match": res["duration_seconds"] / self.duration
                 })
         # get the closest match to 100%
-        print(matches)
         return min(matches, key=lambda x: abs(x.get("match") - 1)).get("videoId")
 
     # method for cleaning up any unwanted symbols in song name, artist name etc.

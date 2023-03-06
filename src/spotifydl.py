@@ -15,6 +15,7 @@ class SpotifyDL:
     ccm = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=ccm)
 
+    PROJECT_DIR: Final[str] = os.path.dirname(os.path.realpath(__file__))
     MAX_THREADS: Final[int] = 32
 
     def __init__(self, link: str):
@@ -91,13 +92,9 @@ class SpotifyDL:
                 ))
 
         return playlist
-
-    def split_playlist(self, threads: int = 1) -> List[Playlist]:
-        MAX_THREADS = 32 # FIXME: Temporary fix
-        # max thread count 
-        if threads > MAX_THREADS:
-            threads = MAX_THREADS
-
+    
+    # split the playlist into sublists for threading 
+    def split_playlist(self, threads: int) -> List[Playlist]:
         # if the playlist size is smaller the the wanted threads
         if self.size <= threads:
             threads = self.size
@@ -110,7 +107,26 @@ class SpotifyDL:
             sub: Playlist = Playlist(sub)
             threading_playlists.append(sub)
         return threading_playlists
-
+    
+    # start downloading the playlist
     def download(self, threads: int = 1):
+        MAX_THREADS = 32 # FIXME: Temporary fix 
+        PROJECT_DIR: Final[str] = os.path.dirname(os.path.realpath(__file__))
+
+        playlist_path: str = PROJECT_DIR + f"/out/{self.name.replace(' ', '_')}"
+
+        # create genric out folder 
+        try:
+            os.mkdir(PROJECT_DIR + "/out")
+
+            # create a folder for the playlist
+            os.mkdir(playlist_path)
+        except FileExistsError:
+            pass
+
+        # max thread count 
+        if threads > MAX_THREADS:
+            threads = MAX_THREADS
+
         for thread_playlist in self.split_playlist(threads=threads):
-            threading.Thread(target=thread_playlist.download).start()
+            threading.Thread(target=thread_playlist.download, args=[playlist_path]).start()
