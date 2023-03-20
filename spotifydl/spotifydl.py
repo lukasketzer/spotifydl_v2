@@ -4,8 +4,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import Final, List
 import os
-from playlist import Playlist
-from song import Song
+from .playlist import Playlist
+from .song import Song
 import threading
 
 
