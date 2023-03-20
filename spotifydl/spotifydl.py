@@ -15,9 +15,6 @@ class SpotifyDL:
     ccm = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=ccm)
 
-    PROJECT_DIR: Final[str] = os.path.dirname(os.path.realpath(__file__))
-    MAX_THREADS: Final[int] = 32
-
     def __init__(self, link: str):
         self.link: Final[str] = link
 
@@ -83,7 +80,7 @@ class SpotifyDL:
                 title: str = song.get("name")
                 artist: str = song.get("artists")[0].get("name")  # TODO if there are multiple artists, only takes one atm
                 album: str = song.get("album").get("name")
-                duration: str = song.get("duration_ms")
+                duration: int = round(int(song.get("duration_ms")) / 1000) # from ms to s
 
                 playlist.add(Song(
                     title=title,
@@ -123,13 +120,14 @@ class SpotifyDL:
             pass
         
         # create playlist folder
+        # remove older playlists from out folder
         try:
             shutil.rmtree(playlist_path)
         except FileNotFoundError:
             pass
 
         try:
-            shutil.rmtree(f"{playlist_path}.zip")
+            os.remove(f"{playlist_path}.zip")
         except FileNotFoundError:
             pass
 
