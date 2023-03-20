@@ -100,13 +100,8 @@ class Song:
 
         matches: list = []
 
-        # import json
-        # print(json.dumps(results))
-        
         # iterate over results to get the best matching result 
         for res in results:
-            # if res["resultType"] not in ["song"]:
-            #     continue
 
             # add all matchen to a list
             matches.append({
@@ -115,13 +110,15 @@ class Song:
                 "match": res["duration_seconds"] / self.duration
                 })
 
-        # get the closest match to 100%
-        if len(matches) == 0:
-            return None
-        
-        matches = [m for m in matches if self.title in m.get("title")]
+        filtered_matches = [m for m in matches if self.title in m.get("title")]
 
-        return f'{self.YT_MUSIC_BASE_URL}{min(matches, key=lambda x: abs(x.get("match") - 1)).get("videoId")}'
+
+        # get the closest match to 100%
+        if len(filtered_matches) == 0:
+            return f'{self.YT_MUSIC_BASE_URL}{min(matches, key=lambda x: abs(x.get("match") - 1)).get("videoId")}'
+
+
+        return f'{self.YT_MUSIC_BASE_URL}{min(filtered_matches, key=lambda x: abs(x.get("match") - 1)).get("videoId")}'
 
     @staticmethod
     def clean_string(_string: str) -> str:

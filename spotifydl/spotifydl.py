@@ -104,6 +104,8 @@ class SpotifyDL:
             sub: List[Song] = self.playlist.playlist[i:i + threading_playlists_size]
             sub: Playlist = Playlist(sub)
             threading_playlists.append(sub)
+
+        print(threading_playlists)
         return threading_playlists
     
     # start downloading the playlist
