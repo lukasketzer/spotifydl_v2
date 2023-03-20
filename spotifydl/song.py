@@ -79,6 +79,8 @@ class Song:
                 "match": res["duration_seconds"] / self.duration
                 })
         # get the closest match to 100%
+        if len(matches) == 0:
+            return None
         return min(matches, key=lambda x: abs(x.get("match") - 1)).get("videoId")
 
     # method for cleaning up any unwanted symbols in song name, artist name etc.

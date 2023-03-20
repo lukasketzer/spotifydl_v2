@@ -7,7 +7,7 @@ import os
 from .playlist import Playlist
 from .song import Song
 import threading
-
+import shutil
 
 class SpotifyDL:
     CLIENT_ID: Final[str] = os.environ.get("CLIENT_ID")
@@ -20,6 +20,7 @@ class SpotifyDL:
 
     def __init__(self, link: str):
         self.link: Final[str] = link
+
 
         # playlist metadata
         self.creator: str = None
@@ -118,15 +119,41 @@ class SpotifyDL:
         # create genric out folder 
         try:
             os.mkdir(PROJECT_DIR + "/out")
-
-            # create a folder for the playlist
-            os.mkdir(playlist_path)
         except FileExistsError:
             pass
+        
+        # create playlist folder
+        try:
+            shutil.rmtree(playlist_path)
+        except FileNotFoundError:
+            pass
 
+        try:
+            shutil.rmtree(f"{playlist_path}.zip")
+        except FileNotFoundError:
+            pass
+
+        os.mkdir(playlist_path)
+       
         # max thread count 
         if threads > MAX_THREADS:
             threads = MAX_THREADS
 
+        thread_list = []
+
+        # start all threads
         for thread_playlist in self.split_playlist(threads=threads):
-            threading.Thread(target=thread_playlist.download, args=[playlist_path]).start()
+            t = threading.Thread(target=thread_playlist.download, args=[playlist_path])
+            t.start()
+            thread_list.append(t)
+
+        # wait until all threads are done
+        for thread in thread_list:
+            thread.join()
+
+        # zip folder 
+        shutil.make_archive(playlist_path, "zip", playlist_path)
+
+        return f"{playlist_path}.zip"
+
+        
