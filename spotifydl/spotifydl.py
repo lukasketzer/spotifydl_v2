@@ -73,6 +73,7 @@ class SpotifyDL:
         playlist: Playlist = Playlist()
 
         for i in range(math.ceil(self.size / 100)):
+            print(i)
             response = self.sp.playlist_items(playlist_id=self.link, limit=100, offset=(i * 100))
             for song in response.get("items"):
                 song = song.get("track")

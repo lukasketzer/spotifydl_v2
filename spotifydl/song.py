@@ -34,7 +34,6 @@ class Song:
         self.artist = artist
         self.album = album
         self.duration = duration
-        self.url = self.get_url()
 
     def download(self, playlist_path: str = ""):
         """
@@ -52,7 +51,10 @@ class Song:
         file_name: str = f"{playlist_path}spotifydl_{base_file_name}.m4a"
         base_file_name = playlist_path + base_file_name
 
-        if self.url == None: # TODO handle video ids which have not been found
+
+        url = self.get_url()
+
+        if url == None: # TODO handle video ids which have not been found
             return
 
         ydl_opts: dict = {"format": "bestaudio[ext=m4a]",           # downloaded audio should be m4a
@@ -64,7 +66,7 @@ class Song:
         with YoutubeDL(ydl_opts) as ydl:
             try:
                 print(f"Downloading {self.title} by {self.artist}...")
-                ydl.download(self.url)
+                ydl.download(url)
 
                 cmd = ["ffmpeg", "-i", f"{base_file_name}.m4a",
                        "-metadata", f"title={self.title}",
