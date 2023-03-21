@@ -1,5 +1,5 @@
 from typing import Final, List
-from .song import Song
+from song import Song
 
 
 class Playlist:

@@ -4,8 +4,8 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import Final, List
 import os
-from .playlist import Playlist
-from .song import Song
+from playlist import Playlist
+from song import Song
 import threading
 import shutil
 
@@ -38,7 +38,7 @@ class SpotifyDL:
         self.name = response.get("name")
         self.creator = response.get("artists")[0].get("name")
         self.size = response.get("tracks").get("total")
-        
+
 
         album: Playlist = Playlist()
 
@@ -68,6 +68,7 @@ class SpotifyDL:
         self.name = response.get("name")
         self.creator = response.get("owner").get("display_name")
         self.size = response.get("tracks").get("total")
+
 
         playlist: Playlist = Playlist()
 
