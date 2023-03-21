@@ -4,6 +4,7 @@ import string
 from typing import Final
 import os
 import subprocess
+import mutagen.mp4
 
 
 class Song:
@@ -42,14 +43,20 @@ class Song:
 
         """
 
-        
+        file_ext: str = "m4a" 
         # add trailing / for path
         if playlist_path != "" and playlist_path[-1] != "/": 
             playlist_path += "/"
 
-        base_file_name: str = self.clean_string(f"{self.title}_{self.artist}_{self.album}")
-        file_name: str = f"{playlist_path}spotifydl_{base_file_name}.m4a"
+        base_file_name: str = "spotifydl_" + self.clean_string(f"{self.title}_{self.artist}_{self.album}")
         base_file_name = playlist_path + base_file_name
+
+        file_path: str = f"{base_file_name}.{file_ext}"
+
+        if os.path.exists(file_path):
+            print(f"Skipping {self.title} by {self.artist}")
+            return
+
 
 
         url = self.get_url()
@@ -57,7 +64,7 @@ class Song:
         if url == None: # TODO handle video ids which have not been found
             return
 
-        ydl_opts: dict = {"format": "bestaudio[ext=m4a]",           # downloaded audio should be m4a
+        ydl_opts: dict = {"format": f"bestaudio[ext={file_ext}]",           # downloaded audio should be m4a
                           "quiet": "true",
                           "outtmpl": f"{base_file_name}.%(ext)s"    # set output file name
                           }
@@ -68,15 +75,18 @@ class Song:
                 print(f"Downloading {self.title} by {self.artist}...")
                 ydl.download(url)
 
-                cmd = ["ffmpeg", "-i", f"{base_file_name}.m4a",
-                       "-metadata", f"title={self.title}",
-                       "-metadata", f"artist={self.artist}",
-                       "-metadata", f"album={self.album}",
-                       file_name]
+                # cmd = ["ffmpeg", "-i", f"{base_file_name}.{file_ext}",
+                #        "-metadata", f"title={self.title}",
+                #        "-metadata", f"artist={self.artist}",
+                #        "-metadata", f"album={self.album}",
+                #        file_name]
+                file = mutagen.mp4.MP4(file_path)
+                file["©nam"] = self.title
+                file["©ART"] = self.artist
+                file["©alb"] = self.album
 
                 print(f"Embedding metadata...")
-                subprocess.run(cmd)
-                os.remove(f"{base_file_name}.m4a")
+                file.save()
             except:
                 return
 
@@ -104,16 +114,20 @@ class Song:
 
         # iterate over results to get the best matching result 
         for res in results:
-
             # add all matchen to a list
-            matches.append({
-                "title": res["title"],
-                "videoId": res["videoId"],
-                "match": res["duration_seconds"] / self.duration
-                })
+            try:
+                matches.append({
+                    "title": res["title"],
+                    "videoId": res["videoId"],
+                    "match": res["duration_seconds"] / self.duration
+                    })
+            except KeyError:
+                continue
+            except ZeroDivisionError:
+                continue
+            
 
         filtered_matches = [m for m in matches if self.title in m.get("title")]
-
 
         # get the closest match to 100%
         if len(filtered_matches) == 0:
@@ -134,3 +148,4 @@ class Song:
         for i in string.punctuation:
             _string = _string.replace(i, "")
         return _string
+

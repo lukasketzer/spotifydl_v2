@@ -73,7 +73,6 @@ class SpotifyDL:
         playlist: Playlist = Playlist()
 
         for i in range(math.ceil(self.size / 100)):
-            print(i)
             response = self.sp.playlist_items(playlist_id=self.link, limit=100, offset=(i * 100))
             for song in response.get("items"):
                 song = song.get("track")
@@ -107,7 +106,6 @@ class SpotifyDL:
             sub: Playlist = Playlist(sub)
             threading_playlists.append(sub)
 
-        print(threading_playlists)
         return threading_playlists
     
     # start downloading the playlist
@@ -126,8 +124,8 @@ class SpotifyDL:
         # create playlist folder
         # remove older playlists from out folder
         try:
-            shutil.rmtree(playlist_path)
-        except FileNotFoundError:
+            os.mkdir(playlist_path)
+        except FileExistsError:
             pass
 
         try:
@@ -135,7 +133,6 @@ class SpotifyDL:
         except FileNotFoundError:
             pass
 
-        os.mkdir(playlist_path)
        
         # max thread count 
         if threads > MAX_THREADS:
@@ -152,6 +149,9 @@ class SpotifyDL:
         # wait until all threads are done
         for thread in thread_list:
             thread.join()
+
+        print("Download complete...")
+        print("Compressing folder...")
 
         # zip folder 
         shutil.make_archive(playlist_path, "zip", playlist_path)
