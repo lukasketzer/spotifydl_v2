@@ -109,11 +109,13 @@ class SpotifyDL:
         return threading_playlists
     
     # start downloading the playlist
-    def download(self, threads: int = 1):
+    def download(self, threads: int = 1, replace: bool = True):
         MAX_THREADS = 32 # FIXME: Temporary fix 
         PROJECT_DIR: Final[str] = os.path.dirname(os.path.realpath(__file__))
 
         playlist_path: str = PROJECT_DIR + f"/out/{self.name.replace(' ', '_')}"
+
+        
 
         # create genric out folder 
         try:
@@ -122,12 +124,21 @@ class SpotifyDL:
             pass
         
         # create playlist folder
-        # remove older playlists from out folder
+        if replace == True:
+
+            # remove older playlists from out folder
+            try:
+                shutil.rmtree(playlist_path)
+            except FileNotFoundError:
+                pass
+
+        # create new playlist folder
         try:
             os.mkdir(playlist_path)
         except FileExistsError:
             pass
-
+        
+        # remove old zip folder
         try:
             os.remove(f"{playlist_path}.zip")
         except FileNotFoundError:
