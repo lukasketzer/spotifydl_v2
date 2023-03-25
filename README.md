@@ -22,7 +22,7 @@ git clone https://github.com/lukasketzer/spotifydl_v2.git && cd spotifydl_v2
 ```
 3. Create a python venv in the source directory and activate it:
 ```
-pyhton -m venv venv
+python -m venv venv
 source venv/bin/activate
 ```
 4. Install all depedencies:
