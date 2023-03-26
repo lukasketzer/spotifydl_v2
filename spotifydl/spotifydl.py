@@ -109,7 +109,7 @@ class SpotifyDL:
         return threading_playlists
     
     # start downloading the playlist
-    def download(self, threads: int = 1, replace: bool = True):
+    def download(self, threads: int = 1, fix_missing: bool = False):
         MAX_THREADS = 32 # FIXME: Temporary fix 
         PROJECT_DIR: Final[str] = os.path.dirname(os.path.realpath(__file__))
 
@@ -124,7 +124,7 @@ class SpotifyDL:
             pass
         
         # create playlist folder
-        if replace == True:
+        if not fix_missing:
 
             # remove older playlists from out folder
             try:
