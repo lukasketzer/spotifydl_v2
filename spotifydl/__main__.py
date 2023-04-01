@@ -1,5 +1,6 @@
 import argparse
 from spotifydl import SpotifyDL
+# import spotifydl
 from time import sleep
 
 
@@ -12,7 +13,7 @@ def main(args):
     # start_download: str = input("Start download [y / N]\n").lower()
     # if start_download == "y" or start_download == "n":
     #     spdl.download(threads=args.thread_count)
-    sleep(1)
+    sleep(0.5)
     spdl.download(threads=args.thread_count, fix_missing=args.fix_missing)
 
 

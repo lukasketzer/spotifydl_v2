@@ -4,10 +4,11 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 from typing import Final, List
 import os
-from playlist import Playlist
-from song import Song
 import threading
 import shutil
+from playlist import Playlist
+from song import Song
+
 
 class SpotifyDL:
     CLIENT_ID: Final[str] = os.environ.get("CLIENT_ID")
@@ -20,10 +21,6 @@ class SpotifyDL:
 
     def __init__(self, link: str):
         self.link: Final[str] = link
-
-        # playlist paths
-        self.playlist_path = self.PROJECT_DIR + f"/out/{self.name.replace(' ', '_')}"
-        self.zip_path = self.playlist_path + ".zip"
 
         # playlist metadata
         self.creator: str = None
@@ -38,6 +35,10 @@ class SpotifyDL:
         else:
             print("Invaild URL, or cannot be downloaded")
             exit(1)
+
+        # playlist paths
+        self.playlist_path = self.PROJECT_DIR + f"/out/{self.name.replace(' ', '_')}"
+        self.zip_path = self.playlist_path + ".zip"
 
     def get_spotify_album(self) -> Playlist:
         response = self.sp.album(self.link)
