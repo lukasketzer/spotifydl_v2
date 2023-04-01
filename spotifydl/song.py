@@ -1,7 +1,7 @@
 from yt_dlp import YoutubeDL
 from ytmusicapi import YTMusic
 import string
-from typing import Final
+from typing import Final, List
 import os
 import subprocess
 import mutagen.mp4
@@ -22,7 +22,7 @@ class Song:
 
     YT_MUSIC_BASE_URL: Final[str] = "https://youtube.com/watch?v="
 
-    def __init__(self, title: str = "", artist: str = "", album: str = "", duration: int = 0):
+    def __init__(self, title: str = "", artist: str = "", features: List[str] = [] ,album: str = "", duration: int = 0):
         """
         Create a Song object, with the given parameters:
         :param str title:       The title of the song
@@ -33,8 +33,12 @@ class Song:
 
         self.title = title
         self.artist = artist
+        self.features = features
         self.album = album
         self.duration = duration
+
+    def __str__(self):
+        return f"{self.title} by {self.artist}, {', '.join(self.features)}"
 
     def download(self, playlist_path: str = ""):
         """
@@ -74,18 +78,13 @@ class Song:
             try:
                 print(f"Downloading {self.title} by {self.artist}...")
                 ydl.download(url)
-
-                # cmd = ["ffmpeg", "-i", f"{base_file_name}.{file_ext}",
-                #        "-metadata", f"title={self.title}",
-                #        "-metadata", f"artist={self.artist}",
-                #        "-metadata", f"album={self.album}",
-                #        file_name]
+ 
                 file = mutagen.mp4.MP4(file_path)
                 file["©nam"] = self.title
                 file["©ART"] = self.artist
                 file["©alb"] = self.album
 
-                print(f"Embedding metadata...")
+                print(f"\nEmbedding metadata...")
                 file.save()
             except:
                 return
@@ -112,22 +111,28 @@ class Song:
 
         matches: list = []
 
+
         # iterate over results to get the best matching result 
         for res in results:
             # add all matchen to a list
             try:
                 matches.append({
                     "title": res["title"],
+                    "artist": res["artists"][0]["name"],
                     "videoId": res["videoId"],
                     "match": res["duration_seconds"] / self.duration
                     })
+
             except KeyError:
                 continue
             except ZeroDivisionError:
                 continue
-            
 
-        filtered_matches = [m for m in matches if self.title in m.get("title")]
+        # filter out wrong artists
+        filtered_matches = [m for m in matches if self.artist in m.get("artist")]
+
+        filtered_matches = [m for m in filtered_matches if self.title in m.get("title")]
+
 
         # get the closest match to 100%
         if len(filtered_matches) == 0:

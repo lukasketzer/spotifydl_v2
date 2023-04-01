@@ -49,11 +49,15 @@ class SpotifyDL:
                 # extract title artist and album from api response and append to playlist list
                 title: str = song.get("name")
                 artist: str = song.get("artists")[0].get("name")  # TODO there are multiple artists, only takes one atm
+                features: List[str] = song.get("artists")[1:]
+                features = list(map(lambda f: f.get("name"), features))
+
                 duration: str = song.get("duration_ms")
 
                 album.add(Song(
                     title=title,
                     artist=artist,
+                    features=features,
                     album=self.name,
                     duration=duration
                 ))
@@ -80,12 +84,16 @@ class SpotifyDL:
                 # extract title artist and album from api response and append to playlist list
                 title: str = song.get("name")
                 artist: str = song.get("artists")[0].get("name")  # TODO if there are multiple artists, only takes one atm
+                features: List[str] = song.get("artists")[1:]
+                features = list(map(lambda f: f.get("name"), features)) 
+
                 album: str = song.get("album").get("name")
                 duration: int = round(int(song.get("duration_ms")) / 1000) # from ms to s
 
                 playlist.add(Song(
                     title=title,
                     artist=artist,
+                    features=features,
                     album=album,
                     duration=duration
                 ))

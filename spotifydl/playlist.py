@@ -12,7 +12,10 @@ class Playlist:
         self.size: int = len(self.playlist)
 
     def download(self, playlist_path: str):
+
+        # remove duplicate songs
         self.playlist = list(set(self.playlist))
+
         for song in self.playlist:
             song.download(playlist_path)
 
