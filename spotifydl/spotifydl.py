@@ -12,12 +12,18 @@ import shutil
 class SpotifyDL:
     CLIENT_ID: Final[str] = os.environ.get("CLIENT_ID")
     CLIENT_SECRET: Final[str] = os.environ.get("CLIENT_SECRET")
+    MAX_THREADS = 32 # FIXME: i want it as a class-wide variable like client secret etc. 
+    PROJECT_DIR: Final[str] = os.path.dirname(os.path.realpath(__file__))
+
     ccm = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
     sp = spotipy.Spotify(client_credentials_manager=ccm)
 
     def __init__(self, link: str):
         self.link: Final[str] = link
 
+        # playlist paths
+        self.playlist_path = self.PROJECT_DIR + f"/out/{self.name.replace(' ', '_')}"
+        self.zip_path = self.playlist_path + ".zip"
 
         # playlist metadata
         self.creator: str = None
@@ -118,50 +124,46 @@ class SpotifyDL:
     
     # start downloading the playlist
     def download(self, threads: int = 1, fix_missing: bool = False):
-        MAX_THREADS = 32 # FIXME: Temporary fix 
-        PROJECT_DIR: Final[str] = os.path.dirname(os.path.realpath(__file__))
-
-        playlist_path: str = PROJECT_DIR + f"/out/{self.name.replace(' ', '_')}"
-
         
 
+        # playlist_path: str = self.PROJECT_DIR + f"/out/{self.name.replace(' ', '_')}"
+        
         # create genric out folder 
         try:
-            os.mkdir(PROJECT_DIR + "/out")
+            os.mkdir(self.PROJECT_DIR + "/out")
         except FileExistsError:
             pass
         
         # create playlist folder
         if not fix_missing:
-
             # remove older playlists from out folder
             try:
-                shutil.rmtree(playlist_path)
+                shutil.rmtree(self.playlist_path)
             except FileNotFoundError:
                 pass
 
         # create new playlist folder
         try:
-            os.mkdir(playlist_path)
+            os.mkdir(self.playlist_path)
         except FileExistsError:
             pass
         
         # remove old zip folder
         try:
-            os.remove(f"{playlist_path}.zip")
+            os.remove(self.zip_path)
         except FileNotFoundError:
             pass
 
        
         # max thread count 
-        if threads > MAX_THREADS:
-            threads = MAX_THREADS
+        if threads > self.MAX_THREADS:
+            threads = self.MAX_THREADS
 
         thread_list = []
 
         # start all threads
         for thread_playlist in self.split_playlist(threads=threads):
-            t = threading.Thread(target=thread_playlist.download, args=[playlist_path])
+            t = threading.Thread(target=thread_playlist.download, args=[self.playlist_path])
             t.start()
             thread_list.append(t)
 
@@ -173,8 +175,8 @@ class SpotifyDL:
         print("Compressing folder...")
 
         # zip folder 
-        shutil.make_archive(playlist_path, "zip", playlist_path)
+        shutil.make_archive(self.playlist_path, "zip", self.playlist_path)
 
-        return f"{playlist_path}.zip"
+        return self.zip_path
 
         
