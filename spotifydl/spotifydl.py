@@ -124,7 +124,7 @@ class SpotifyDL:
         return threading_playlists
     
     # start downloading the playlist
-    def download(self, threads: int = 1, fix_missing: bool = False):
+    def download(self, threads: int = 10, fix_missing: bool = False):
         
 
         # playlist_path: str = self.PROJECT_DIR + f"/out/{self.name.replace(' ', '_')}"
