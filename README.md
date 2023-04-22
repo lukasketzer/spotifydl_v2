@@ -31,7 +31,7 @@ pip install -r requirements.txt
 ```
 5. Go into the `spotifydl` directory:
 ```
-cd spotifydl
+cd src
 ````
 6. Download the playlist or album you want
 ```
