@@ -29,7 +29,7 @@ source venv/bin/activate
 ```
 pip install -r requirements.txt
 ```
-5. Go into the `spotifydl` directory:
+5. Go into the `src` directory:
 ```
 cd src
 ````
