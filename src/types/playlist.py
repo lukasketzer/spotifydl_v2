@@ -3,13 +3,13 @@ from song import Song
 
 
 class Playlist:
-    def __init__(self, playlist: List[Song] = None):
-        if playlist is None:
-            self.playlist = []
-        else:
-            self.playlist: List[Song] = playlist
+    def __init__(self, link: str, creator: str, name: str, size: int):
+        self.link: Final[str]
+        self.creator: str
+        self.name: str
+        self.size: int
 
-        self.size: int = len(self.playlist)
+        self.playlist: List[Song] = []
 
     def download(self, playlist_path: str):
         # remove duplicate songs

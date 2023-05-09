@@ -3,7 +3,7 @@ from ytmusicapi import YTMusic
 import string
 from typing import Final, List
 import os
-import subprocess
+import ffmpeg
 import mutagen.mp4
 
 
@@ -23,6 +23,7 @@ class Song:
 
     def __init__(
         self,
+        track: int = 0,
         title: str = "",
         artist: str = "",
         features: List[str] = [],
@@ -36,7 +37,7 @@ class Song:
         :param str album:       The album of the song
         :param int duration:    The duration of the song in ms (milliseconds)
         """
-
+        self.track = track
         self.title = title
         self.artist = artist
         self.features = features
@@ -44,7 +45,59 @@ class Song:
         self.duration = duration
 
     def __str__(self):
-        return f"{self.title} by {self.artist}, {', '.join(self.features)}"
+        return f"{self.title} - {self.artist}, {', '.join(self.features)}"
+
+    # def download(self, playlist_path: str = "", file_ext: str = "m4a"):
+    #     """
+    #     :param str playlist_path:   A path where the downloaded file is to.
+    #                                 If left empty, the downloaded song is going to be placed in the source directory.
+    #     """
+
+    #     # add trailing / for path
+    #     if playlist_path != "" and playlist_path[-1] != "/":
+    #         playlist_path += "/"
+
+    #     base_file_name: str = "spotifydl_" + self.clean_string(
+    #         f"{self.title}_{self.artist}_{self.album}"
+    #     )
+    #     base_file_name = playlist_path + base_file_name
+
+    #     file_path: str = f"{base_file_name}.{file_ext}"
+
+    #     if os.path.exists(file_path):
+    #         print(f"Skipping {self.title} by {self.artist}")
+    #         return
+
+    #     url = self.get_url()
+
+    #     if url == None:  # TODO handle video ids which have not been found
+    #         return
+
+    #     ydl_opts: dict = {
+    #         "format": f"bestaudio[ext={file_ext}]",  # downloaded audio should be m4a
+    #         "quiet": "true",
+    #         "outtmpl": f"{base_file_name}.%(ext)s",  # set output file name
+    #     }
+
+    #     # download audio
+    #     with YoutubeDL(ydl_opts) as ydl:
+    #         try:
+    #             print(f"Downloading {self.title} - {self.artist}...")
+    #             ydl.download(url)
+
+    #             ffmpeg
+    #             .input(filename=file_path)
+    #             .
+    #             .output(f"{base_file_name}.{file_ext}")
+    #             .run()
+
+    #             print("\nEmbedding metadata...")
+    #         except:
+    #             return
+
+
+
+
 
     def download(self, playlist_path: str = ""):
         """
@@ -91,7 +144,7 @@ class Song:
                 file["©ART"] = self.artist
                 file["©alb"] = self.album
 
-                print(f"\nEmbedding metadata...")
+                print("\nEmbedding metadata...")
                 file.save()
             except:
                 return

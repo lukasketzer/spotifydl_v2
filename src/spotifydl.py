@@ -6,16 +6,20 @@ from typing import Final, List
 import os
 import threading
 import shutil
-from playlist import Playlist
-from song import Song
+from types.playlist import Playlist
+from types.song import Song
 
+
+"""
+
+entry point
+
+"""
 
 class SpotifyDL:
     CLIENT_ID: Final[str] = os.environ.get("CLIENT_ID")
     CLIENT_SECRET: Final[str] = os.environ.get("CLIENT_SECRET")
-    MAX_THREADS = (
-        32  # FIXME: i want it as a class-wide variable like client secret etc.
-    )
+    MAX_THREADS: int = 32
     PROJECT_DIR: Final[str] = os.path.dirname(os.path.realpath(__file__))
 
     ccm = SpotifyClientCredentials(client_id=CLIENT_ID, client_secret=CLIENT_SECRET)
@@ -24,10 +28,6 @@ class SpotifyDL:
     def __init__(self, link: str):
         self.link: Final[str] = link
 
-        # playlist metadata
-        self.creator: str = None
-        self.name: str = None
-        self.size: int = 0
         self.playlist: Playlist = None
 
         if "playlist" in link:
@@ -44,16 +44,24 @@ class SpotifyDL:
 
     def get_spotify_album(self) -> Playlist:
         response = self.sp.album(self.link)
-        self.name = response.get("name")
-        self.creator = response.get("artists")[0].get("name")
-        self.size = response.get("tracks").get("total")
+        name: str = response.get("name")
+        creator: str = response.get("artists")[0].get("name")
+        size: int = response.get("tracks").get("total")
 
-        album: Playlist = Playlist()
+        album: Playlist = Playlist(
+            link=self.link,
+            name=name,
+            creator=creator,
+            size=size
+        )
 
         for i in range(math.ceil(self.size / 100)):
             response = self.sp.album_tracks(album_id=self.link, offset=(i * 100))
             for song in response.get("items"):
+
                 # extract title artist and album from api response and append to playlist list
+                track: int = song.get("track_number")
+                track: int = song.get()
                 title: str = song.get("name")
                 artist: str = song.get("artists")[0].get(
                     "name"
@@ -65,6 +73,7 @@ class SpotifyDL:
 
                 album.add(
                     Song(
+                        track=track,
                         title=title,
                         artist=artist,
                         features=features,
@@ -94,6 +103,7 @@ class SpotifyDL:
                 song = song.get("track")
 
                 # extract title artist and album from api response and append to playlist list
+                track: int = song.get("track_number")
                 title: str = song.get("name")
                 artist: str = song.get("artists")[0].get(
                     "name"
@@ -108,6 +118,7 @@ class SpotifyDL:
 
                 playlist.add(
                     Song(
+                        track=track,
                         title=title,
                         artist=artist,
                         features=features,
